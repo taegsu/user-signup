@@ -1,0 +1,17 @@
+.DS_Store
+.idea
+.idea/.gitignore
+.idea/misc.xml
+.idea/moa-commerce-manager.iml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/inspectionProfiles/profiles_settings.xml
+*.pyc
+venv
+.vscode/
+static/
+.pytest_cache
+*/.pytest_cache
+.python-version
+pyproject.toml
+.local
