@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 
-router = APIRouter(prefix="/user/v1")
+router = APIRouter(prefix="/sms/v1")
 
 
 @router.get(path="/healthcheck")
