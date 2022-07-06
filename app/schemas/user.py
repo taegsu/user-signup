@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
@@ -25,3 +26,13 @@ class ResponseUser(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class LoginType(str, Enum):
+    email = "email"
+    phone_number = "phone_number"
+
+
+class RequestLogin(BaseModel):
+    user_info: str
+    password: str

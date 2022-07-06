@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 from pydantic import ValidationError
 
+from app.common.database.postgres.manage import init_database
 from app.router.user_api import router as api_router
 
 

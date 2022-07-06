@@ -30,14 +30,20 @@ def get_user_by_user_token(*, db_session: Session, user_token: str) -> User:
     return res.scalar()
 
 
+def get_user_by_email_password(*, db_session: Session, email: str, password: str) -> User:
+    query = select(User).where(User.email == email, User.password == password)
+    res = db_session.execute(query)
+    return res.scalar()
+
+
+def get_user_by_phone_password(*, db_session: Session, phone_number: str, password: str) -> User:
+    query = select(User).where(User.phone_number == phone_number, User.password == password)
+    res = db_session.execute(query)
+    return res.scalar()
+
+
 def create_user(
-    *,
-    db_session: Session,
-    phone_number: str,
-    name: str,
-    email: str,
-    nickname: str,
-    password: str
+    *, db_session: Session, phone_number: str, name: str, email: str, nickname: str, password: str
 ) -> User:
     user = User(
         user_token=uuid4(),
