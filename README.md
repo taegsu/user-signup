@@ -31,6 +31,9 @@ $ poetry run alembic upgrade head
 
 # Run FastAPI Server
 $ poetry run uvicorn app.main:app --host 0.0.0.0
+
+# Run pytest
+$ poetry run pytest
 ```
 - --
 ## 과제 설명
@@ -250,7 +253,7 @@ $ http://localhost:8000/user/v1/
 ## Example ##
 # Curl
 $ curl -X 'GET' \
-  'http://localhost:8000/user/v1' \
+  'http://localhost:8000/user/v1/' \
   -H 'accept: application/json' \
   -H 'user-token: 4db5dbc8-82ec-4f8e-9848-9fa6d5b1847e'
   
@@ -269,3 +272,10 @@ $ curl -X 'GET' \
 }
 ```
 - --
+
+## 특별히 소개하고 싶은 부분
+### 1. 테스트 코드
+- 모든 상황에 대한 성공, 실패 테스트코드를 작성 하려고 노력 했습니다.
+
+### 2. 전화번호 인증
+- 어떻게 구현할까 생각했는데 DB에 계속 저장하는 것은 유저가 많아 질수록 관리가 힘들어 질 거 같았고 인증번호 같은 경우는 휘발성데이터이기 때문에 Redis를 이용하도록 결정했습니다.
