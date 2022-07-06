@@ -6,4 +6,3 @@ class SmsSendException:
             "content": {"application/json": {"example": {"description": "해당 번호는 이미 가입한 유저입니다."}}}
         },
     }
-

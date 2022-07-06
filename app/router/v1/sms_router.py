@@ -12,10 +12,7 @@ router = APIRouter(prefix="/sms/v1")
 
 
 @router.post(
-    "/send",
-    status_code=status.HTTP_200_OK,
-    summary="SMS 전송",
-    responses=SmsSendException.data
+    "/send", status_code=status.HTTP_200_OK, summary="SMS 전송", responses=SmsSendException.data
 )
 def send_message(
     *,
@@ -23,6 +20,4 @@ def send_message(
     type: MessageType = Query(..., description="메세지 종류(signup or reset)"),
     phone_number: PhoneNumber
 ):
-    return send(
-        db_session=db_session, type=type, phone_number=phone_number.phone_number
-    )
+    return send(db_session=db_session, type=type, phone_number=phone_number.phone_number)

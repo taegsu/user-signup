@@ -85,9 +85,7 @@ def logout_user(*, user_token: str, db_session: Session) -> User:
     return user
 
 
-def reset_password(
-    *, phone_number: str, password: str, db_session: Session
-) -> User:
+def reset_password(*, phone_number: str, password: str, db_session: Session) -> User:
     user = get_user_by_phone_number(db_session=db_session, phone_number=phone_number)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="존재하지 않는 유저입니다.")

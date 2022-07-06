@@ -139,7 +139,7 @@ class TestFailure:
             test_client=test_client, phone_number=phone_number, type=type
         )
 
-        params = {"type": type, "phone_number": phone_number, "code": code-1}
+        params = {"type": type, "phone_number": phone_number, "code": code - 1}
         res = test_client.get("/user/v1/validate", params=params)
         assert res.status_code == status.HTTP_404_NOT_FOUND
 
@@ -197,8 +197,10 @@ class TestFailure:
         # 인증시간 변경
         signup_redis_session.set(
             name=phone_number,
-            value=json.dumps({"created_at": datetime.now() - timedelta(minutes=2, seconds=30),
-                              "code": code}, default=str),
+            value=json.dumps(
+                {"created_at": datetime.now() - timedelta(minutes=2, seconds=30), "code": code},
+                default=str,
+            ),
         )
         params = {"type": type, "phone_number": phone_number, "code": code}
 
@@ -235,8 +237,10 @@ class TestFailure:
         # 인증시간 변경
         reset_redis_session.set(
             name=phone_number,
-            value=json.dumps({"created_at": datetime.now() - timedelta(minutes=2, seconds=30),
-                              "code": code}, default=str),
+            value=json.dumps(
+                {"created_at": datetime.now() - timedelta(minutes=2, seconds=30), "code": code},
+                default=str,
+            ),
         )
 
         params = {"type": type, "phone_number": phone_number, "code": code}

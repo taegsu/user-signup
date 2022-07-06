@@ -96,7 +96,10 @@ def reset(*, req: RequestReset, db_session: Session = Depends(get_db)):
 
 
 @router.get(
-    "/", status_code=status.HTTP_200_OK, response_model=ResponseUser, responses=GetUserException.data
+    "/",
+    status_code=status.HTTP_200_OK,
+    response_model=ResponseUser,
+    responses=GetUserException.data,
 )
 def get(
     *, user_token: str = Header(..., description="유저 토큰"), db_session: Session = Depends(get_ro_db)

@@ -55,7 +55,7 @@ def create_app():
 
     @app.exception_handler(RequestValidationError)
     async def request_validation_error_handler(
-            request: Request, exc: RequestValidationError
+        request: Request, exc: RequestValidationError
     ) -> JSONResponse:
         loc = exc.errors()[0]["loc"]
         msg = exc.errors()[0]["msg"]
@@ -70,5 +70,6 @@ def create_app():
         )
 
     return app
+
 
 app = create_app()
