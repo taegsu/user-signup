@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 
 from app.schemas.sms import MessageType
 from app.schemas.user import LoginType
-from tests.conftest import dummy_signup, dummy_login
+from tests.conftest import dummy_login
 
 
 class TestSuccess:
