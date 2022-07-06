@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
@@ -22,9 +24,15 @@ def get_user_by_nickname(*, db_session: Session, nickname: str) -> User:
     return res.scalar()
 
 
+def get_user_by_user_token(*, db_session: Session, user_token: str) -> User:
+    query = select(User).where(User.user_token == user_token)
+    res = db_session.execute(query)
+    return res.scalar()
+
+
 def create_user(
     *,
-    db_session,
+    db_session: Session,
     phone_number: str,
     name: str,
     email: str,
@@ -32,6 +40,7 @@ def create_user(
     password: str
 ) -> User:
     user = User(
+        user_token=uuid4(),
         phone_number=phone_number,
         name=name,
         email=email,

@@ -13,5 +13,4 @@ static/
 .pytest_cache
 */.pytest_cache
 .python-version
-pyproject.toml
 .local

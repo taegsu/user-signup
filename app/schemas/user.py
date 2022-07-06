@@ -13,6 +13,7 @@ class RequestUser(BaseModel):
 
 class ResponseUser(BaseModel):
     id: int
+    user_token: str = Field(description="유저토큰")
     email: str = Field(description="이메일")
     nickname: str = Field(description="닉네임")
     password: str = Field(description="비밀번호")
@@ -21,3 +22,6 @@ class ResponseUser(BaseModel):
     is_activate: bool = Field(description="로그인 여부")
     created_at: datetime
     updated_at: datetime
+
+    class Config:
+        orm_mode = True

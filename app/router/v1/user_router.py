@@ -1,11 +1,14 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException, Header
 from sqlalchemy.orm import Session
 
 from app.common.database.postgres.core import get_ro_db, get_db
 from app.schemas.sms import MessageType
 from app.schemas.user import RequestUser, ResponseUser
-from app.service.user_service import validate_phone, create
-
+from app.service.user_service import (
+    create,
+    validate_phone_signup,
+    validate_phone_reset_password,
+)
 
 router = APIRouter(prefix="/user/v1")
 
@@ -51,9 +54,18 @@ def validate(
     phone_number: int,
     code: int
 ):
-    return validate_phone(
-        db_session=db_session, type=type, phone_number=phone_number, code=code
-    )
+    if type == MessageType.signup:
+        return validate_phone_signup(
+            db_session=db_session, phone_number=phone_number, code=code
+        )
+    elif type == MessageType.reset:
+        return validate_phone_reset_password(
+            db_session=db_session, phone_number=phone_number, code=code
+        )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="지원하지 않는 타입 입니다."
+        )
 
 
 @router.post(
@@ -84,6 +96,11 @@ def validate(
                 }
             }
         },
+        403: {
+            "content": {
+                "application/json": {"example": {"description": "인증 유효시간이 지났습니다."}}
+            }
+        },
         404: {
             "content": {
                 "application/json": {
@@ -93,9 +110,6 @@ def validate(
                         },
                         "인증이 되지 않은 번호 입니다.": {
                             "value": {"description": "인증이 되지 않은 번호 입니다."},
-                        },
-                        "인증 유효시간이 지났습니다.": {
-                            "value": {"description": "인증 유효시간이 지났습니다."},
                         },
                     }
                 }
@@ -129,3 +143,22 @@ def signup(*, db_session: Session = Depends(get_db), req: RequestUser):
         nickname=req.nickname,
         password=req.password,
     )
+
+
+@router.post(
+    "/login",
+    status_code=status.HTTP_200_OK,
+    responses={
+        403: {
+            "content": {
+                "application/json": {"example": {"description": "인증 유효시간이 지났습니다."}}
+            }
+        }
+    },
+)
+def login(
+    *,
+    user_token: str = Header(..., description="유저 토큰"),
+    db_session: Session = Depends(get_db())
+):
+    pass
