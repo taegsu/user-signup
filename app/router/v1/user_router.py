@@ -135,12 +135,11 @@ def signup(*, db_session: Session = Depends(get_db), req: RequestUser):
 )
 def login(
     *,
-    login_type: LoginType = Body(..., description="로그인 타입(email or phone_number)"),
     req: RequestLogin,
     db_session: Session = Depends(get_db)
 ):
     return login_user(
-        login_type=login_type,
+        login_type=req.login_type,
         user_info=req.user_info,
         password=req.password,
         db_session=db_session,

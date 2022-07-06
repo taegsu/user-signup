@@ -34,5 +34,6 @@ class LoginType(str, Enum):
 
 
 class RequestLogin(BaseModel):
-    user_info: str
-    password: str
+    login_type: LoginType = Field(description="로그인 타입")
+    user_info: str = Field(description="유저 정보")
+    password: str = Field(description="비밀 번호")
