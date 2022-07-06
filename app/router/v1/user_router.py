@@ -91,13 +91,11 @@ def logout(
 )
 def reset(
     *,
-    user_token: str = Header(..., description="유저 토큰"),
     req: RequestReset,
     db_session: Session = Depends(get_db)
 ):
     return reset_password(
-        user_token=user_token,
+        phone_number=req.phone_number,
         password=req.password,
-        reset_password=req.reset_password,
         db_session=db_session,
     )

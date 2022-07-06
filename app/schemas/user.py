@@ -40,5 +40,5 @@ class RequestLogin(BaseModel):
 
 
 class RequestReset(BaseModel):
+    phone_number: str = Field(description="휴대폰 번호")
     password: str = Field(description="현재 비밀번호")
-    reset_password: str = Field(description="변경할 비밀번호")

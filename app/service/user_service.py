@@ -86,20 +86,18 @@ def logout_user(*, user_token: str, db_session: Session) -> User:
 
 
 def reset_password(
-    *, user_token: str, password: str, reset_password: str, db_session: Session
+    *, phone_number: str, password: str, db_session: Session
 ) -> User:
-    user = get_user_by_user_token(db_session=db_session, user_token=user_token)
+    user = get_user_by_phone_number(db_session=db_session, phone_number=phone_number)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="존재하지 않는 유저입니다.")
     if user.is_activate is True:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="로그인 상태에서는 변경할 수 없습니다.")
-    if user.password != password:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="비밀번호를 확인해주세요.")
-    password_check(password=reset_password)
+    password_check(password=password)
     check_phone_verify(phone_number=user.phone_number, redis_session=reset_redis_session)
-    if password == reset_password:
+    if user.password == password:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="같은 비밀번호로 변경할 수 없습니다.")
-    user.password = reset_password
+    user.password = password
     db_session.commit()
     db_session.refresh(user)
     reset_redis_session.delete(user.phone_number)
