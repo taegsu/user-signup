@@ -37,3 +37,8 @@ class RequestLogin(BaseModel):
     login_type: LoginType = Field(description="로그인 타입")
     user_info: str = Field(description="유저 정보")
     password: str = Field(description="비밀 번호")
+
+
+class RequestReset(BaseModel):
+    password: str = Field(description="현재 비밀번호")
+    reset_password: str = Field(description="변경할 비밀번호")

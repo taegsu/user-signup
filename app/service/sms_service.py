@@ -5,7 +5,7 @@ from random import randint
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.common.database.redis.core import reset_session as reset_reids_session
+from app.common.database.redis.core import reset_session as reset_redis_session
 from app.common.database.redis.core import signup_session as signup_redis_session
 from app.repository.user_repo import get_user_by_phone_number
 from app.schemas.sms import MessageType
@@ -25,8 +25,13 @@ def send(*, db_session: Session, type: str, phone_number: str):
             name=phone_number, value=value, ex=timedelta(seconds=60 * 3)
         )
     elif type == MessageType.reset:
-        reset_reids_session.set(
-            key=phone_number, value=value, ex=timedelta(seconds=60 * 3)
+        user = get_user_by_phone_number(db_session=db_session, phone_number=phone_number)
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="가입하지 않은 유저 입니다."
+            )
+        reset_redis_session.set(
+            name=phone_number, value=value, ex=timedelta(seconds=60 * 3)
         )
     else:
         raise HTTPException(

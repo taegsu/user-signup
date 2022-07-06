@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.common.models.user import User
 from app.common.service.user_service import check_phone_verify, phone_verify, password_check
 from app.repository.user_repo import (
     get_user_by_phone_number,
@@ -12,7 +13,7 @@ from app.repository.user_repo import (
     get_user_by_email_password,
 )
 
-from app.common.database.redis.core import reset_session as reset_reids_session
+from app.common.database.redis.core import reset_session as reset_redis_session
 from app.common.database.redis.core import signup_session as signup_redis_session
 from app.schemas.user import LoginType
 
@@ -25,15 +26,15 @@ def validate_phone_signup(*, db_session: Session, phone_number: str, code: int) 
 
 
 def validate_phone_reset_password(*, db_session: Session, phone_number: str, code: int) -> dict:
-    user = get_user_by_phone_number(db_session, phone_number)
+    user = get_user_by_phone_number(db_session=db_session, phone_number=phone_number)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="존재하지 않는 유저입니다.")
-    return phone_verify(phone_number=phone_number, code=code, redis_session=reset_reids_session)
+    return phone_verify(phone_number=phone_number, code=code, redis_session=reset_redis_session)
 
 
 def create(
     *, db_session: Session, phone_number: str, name: str, email: str, nickname: str, password: str
-):
+) -> User:
     check_phone_verify(phone_number=phone_number, redis_session=signup_redis_session)
     check_user_exist(
         db_session=db_session, phone_number=phone_number, email=email, nickname=nickname
@@ -53,7 +54,9 @@ def create(
     return user
 
 
-def login_user(*, login_type: LoginType, user_info: str, password: str, db_session: Session):
+def login_user(
+    *, login_type: LoginType, user_info: str, password: str, db_session: Session
+) -> User:
     if login_type == LoginType.email:
         user = get_user_by_email_password(db_session=db_session, email=user_info, password=password)
         if user is None:
@@ -72,13 +75,34 @@ def login_user(*, login_type: LoginType, user_info: str, password: str, db_sessi
     return user
 
 
-def logout_user(*, user_token: str, db_session: Session):
+def logout_user(*, user_token: str, db_session: Session) -> User:
     user = get_user_by_user_token(db_session=db_session, user_token=user_token)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="존재하지 않는 유저입니다.")
     user.is_activate = False
     db_session.commit()
     db_session.refresh(user)
+    return user
+
+
+def reset_password(
+    *, user_token: str, password: str, reset_password: str, db_session: Session
+) -> User:
+    user = get_user_by_user_token(db_session=db_session, user_token=user_token)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="존재하지 않는 유저입니다.")
+    if user.is_activate is True:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="로그인 상태에서는 변경할 수 없습니다.")
+    if user.password != password:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="비밀번호를 확인해주세요.")
+    password_check(password=reset_password)
+    check_phone_verify(phone_number=user.phone_number, redis_session=reset_redis_session)
+    if password == reset_password:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="같은 비밀번호로 변경할 수 없습니다.")
+    user.password = reset_password
+    db_session.commit()
+    db_session.refresh(user)
+    reset_redis_session.delete(user.phone_number)
     return user
 
 

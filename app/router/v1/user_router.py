@@ -2,14 +2,20 @@ from fastapi import APIRouter, Depends, status, HTTPException, Header, Body
 from sqlalchemy.orm import Session
 
 from app.common.database.postgres.core import get_ro_db, get_db
+from app.common.exceptions.user.login import LoginException
+from app.common.exceptions.user.logout import LogoutException
+from app.common.exceptions.user.reset_password import ResetPasswordException
+from app.common.exceptions.user.signup import SignupException
+from app.common.exceptions.user.validate import ValidateException
 from app.schemas.sms import MessageType
-from app.schemas.user import RequestUser, ResponseUser, LoginType, RequestLogin
+from app.schemas.user import RequestUser, ResponseUser, RequestLogin, RequestReset
 from app.service.user_service import (
     create,
     validate_phone_signup,
     validate_phone_reset_password,
     login_user,
     logout_user,
+    reset_password,
 )
 
 router = APIRouter(prefix="/user/v1")
@@ -18,22 +24,7 @@ router = APIRouter(prefix="/user/v1")
 @router.get(
     "/validate",
     summary="핸드폰 번호 인증",
-    responses={
-        400: {"content": {"application/json": {"example": {"description": "지원하지 않는 타입 입니다."}}}},
-        403: {"content": {"application/json": {"example": {"description": "인증번호 유효시간이 지났습니다."}}}},
-        404: {
-            "content": {
-                "application/json": {
-                    "examples": {
-                        "존재하지 않는 유저입니다.": {"value": {"description": "존재하지 않는 유저입니다."}},
-                        "인증정보가 존재하지 않습니다.": {"value": {"description": "인증정보가 존재하지 않습니다."}},
-                        "인증번호가 올바르지 않습니다.": {"value": {"description": "인증번호가 올바르지 않습니다."}},
-                    }
-                }
-            }
-        },
-        409: {"content": {"application/json": {"example": {"description": "이미 가입한 유저입니다."}}}},
-    },
+    responses=ValidateException.data
 )
 def validate(
     *, db_session: Session = Depends(get_ro_db), type: MessageType, phone_number: str, code: int
@@ -52,66 +43,7 @@ def validate(
     "/signup",
     status_code=status.HTTP_201_CREATED,
     response_model=ResponseUser,
-    responses={
-        400: {
-            "content": {
-                "application/json": {
-                    "examples": {
-                        "비밀번호는 최소 8자 이상이어야 합니다.": {
-                            "value": {"description": "비밀번호는 최소 8자 이상이어야 합니다."},
-                        },
-                        "비밀번호는 최대 20자 입니다.": {
-                            "value": {"description": "비밀번호는 최대 20자 입니다."},
-                        },
-                        "숫자가 포함되어야 합니다.": {
-                            "value": {"description": "숫자가 포함되어야 합니다."},
-                        },
-                        "영문 소문자가 포함되어야 합니다.": {
-                            "value": {"description": "영문 소문자가 포함되어야 합니다."},
-                        },
-                        "영문 대문자가 포함되어야 합니다.": {
-                            "value": {"description": "영문 대문자가 포함되어야 합니다."},
-                        },
-                        "특수문자가 포함되어야 합니다.": {
-                            "value": {"description": "특수문자가 포함되어야 합니다."},
-                        },
-                    }
-                }
-            }
-        },
-        403: {"content": {"application/json": {"example": {"description": "인증 유효시간이 지났습니다."}}}},
-        404: {
-            "content": {
-                "application/json": {
-                    "examples": {
-                        "인증정보가 존재하지 않습니다.": {
-                            "value": {"description": "인증정보가 존재하지 않습니다."},
-                        },
-                        "인증이 되지 않은 번호 입니다.": {
-                            "value": {"description": "인증이 되지 않은 번호 입니다."},
-                        },
-                    }
-                }
-            }
-        },
-        409: {
-            "content": {
-                "application/json": {
-                    "examples": {
-                        "해당 번호는 이미 가입한 유저입니다.": {
-                            "value": {"description": "해당 번호는 이미 가입한 유저입니다."},
-                        },
-                        "해당 이메일은 이미 가입한 유저입니다.": {
-                            "value": {"description": "해당 이메일은 이미 가입한 유저입니다."},
-                        },
-                        "중복된 닉네임 입니다.": {
-                            "value": {"description": "중복된 닉네임 입니다."},
-                        },
-                    }
-                }
-            }
-        },
-    },
+    responses=SignupException.data
 )
 def signup(*, db_session: Session = Depends(get_db), req: RequestUser):
     return create(
@@ -128,16 +60,9 @@ def signup(*, db_session: Session = Depends(get_db), req: RequestUser):
     "/login",
     status_code=status.HTTP_200_OK,
     response_model=ResponseUser,
-    responses={
-        400: {"content": {"application/json": {"example": {"description": "지원하지 않는 타입 입니다."}}}},
-        404: {"content": {"application/json": {"example": {"description": "아이디 비밀번호를 확인해주세요."}}}},
-    },
+    responses=LoginException.data
 )
-def login(
-    *,
-    req: RequestLogin,
-    db_session: Session = Depends(get_db)
-):
+def login(*, req: RequestLogin, db_session: Session = Depends(get_db)):
     return login_user(
         login_type=req.login_type,
         user_info=req.user_info,
@@ -150,11 +75,29 @@ def login(
     "/logout",
     status_code=status.HTTP_200_OK,
     response_model=ResponseUser,
-    responses={
-        404: {"content": {"application/json": {"example": {"description": "존재하지 않는 유저입니다."}}}},
-    },
+    responses=LogoutException.data
 )
 def logout(
     *, user_token: str = Header(..., description="유저 토큰"), db_session: Session = Depends(get_db)
 ):
     return logout_user(user_token=user_token, db_session=db_session)
+
+
+@router.patch(
+    "/reset",
+    status_code=status.HTTP_200_OK,
+    response_model=ResponseUser,
+    responses=ResetPasswordException.data
+)
+def reset(
+    *,
+    user_token: str = Header(..., description="유저 토큰"),
+    req: RequestReset,
+    db_session: Session = Depends(get_db)
+):
+    return reset_password(
+        user_token=user_token,
+        password=req.password,
+        reset_password=req.reset_password,
+        db_session=db_session,
+    )

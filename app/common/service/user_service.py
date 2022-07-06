@@ -25,7 +25,7 @@ def check_phone_verify(phone_number: str, redis_session) -> bool:
     return True
 
 
-def phone_verify(phone_number: int, code: int, redis_session) -> dict:
+def phone_verify(phone_number: str, code: int, redis_session) -> dict:
     verified_data = redis_session.get(phone_number)
     if not verified_data:
         raise HTTPException(

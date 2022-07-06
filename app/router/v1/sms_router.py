@@ -3,6 +3,7 @@ from fastapi import status
 from sqlalchemy.orm import Session
 
 from app.common.database.postgres.core import get_ro_db
+from app.common.exceptions.sms.sms import SmsSendException
 from app.schemas.sms import PhoneNumber, MessageType
 from app.service.sms_service import send
 
@@ -14,23 +15,7 @@ router = APIRouter(prefix="/sms/v1")
     "/send",
     status_code=status.HTTP_200_OK,
     summary="SMS 전송",
-    responses={
-        400: {
-            "content": {
-                "application/json": {"example": {"description": "지원하지 않는 타입 입니다."}}
-            }
-        },
-        404: {
-            "content": {
-                "application/json": {"example": {"description": "가입하지 않은 유저 입니다."}}
-            }
-        },
-        409: {
-            "content": {
-                "application/json": {"example": {"description": "해당 번호는 이미 가입한 유저입니다."}}
-            }
-        },
-    },
+    responses=SmsSendException.data
 )
 def send_message(
     *,
