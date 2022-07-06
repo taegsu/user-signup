@@ -114,3 +114,12 @@ def check_user_exist(*, db_session: Session, phone_number: str, email: str, nick
     user = get_user_by_nickname(db_session=db_session, nickname=nickname)
     if user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="중복된 닉네임 입니다.")
+
+
+def get_user(*, user_token: str, db_session: Session):
+    user = get_user_by_user_token(user_token=user_token, db_session=db_session)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="존재하지 않는 유저입니다.")
+    if user.is_activate is False:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="로그인 상태가 아닙니다.")
+    return user

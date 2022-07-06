@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Header, Body
 from sqlalchemy.orm import Session
 
 from app.common.database.postgres.core import get_ro_db, get_db
+from app.common.exceptions.user.get_user import GetUserException
 from app.common.exceptions.user.login import LoginException
 from app.common.exceptions.user.logout import LogoutException
 from app.common.exceptions.user.reset_password import ResetPasswordException
@@ -16,16 +17,13 @@ from app.service.user_service import (
     login_user,
     logout_user,
     reset_password,
+    get_user,
 )
 
 router = APIRouter(prefix="/user/v1")
 
 
-@router.get(
-    "/validate",
-    summary="핸드폰 번호 인증",
-    responses=ValidateException.data
-)
+@router.get("/validate", summary="핸드폰 번호 인증", responses=ValidateException.data)
 def validate(
     *, db_session: Session = Depends(get_ro_db), type: MessageType, phone_number: str, code: int
 ):
@@ -43,7 +41,7 @@ def validate(
     "/signup",
     status_code=status.HTTP_201_CREATED,
     response_model=ResponseUser,
-    responses=SignupException.data
+    responses=SignupException.data,
 )
 def signup(*, db_session: Session = Depends(get_db), req: RequestUser):
     return create(
@@ -60,7 +58,7 @@ def signup(*, db_session: Session = Depends(get_db), req: RequestUser):
     "/login",
     status_code=status.HTTP_200_OK,
     response_model=ResponseUser,
-    responses=LoginException.data
+    responses=LoginException.data,
 )
 def login(*, req: RequestLogin, db_session: Session = Depends(get_db)):
     return login_user(
@@ -75,7 +73,7 @@ def login(*, req: RequestLogin, db_session: Session = Depends(get_db)):
     "/logout",
     status_code=status.HTTP_200_OK,
     response_model=ResponseUser,
-    responses=LogoutException.data
+    responses=LogoutException.data,
 )
 def logout(
     *, user_token: str = Header(..., description="유저 토큰"), db_session: Session = Depends(get_db)
@@ -87,15 +85,20 @@ def logout(
     "/reset",
     status_code=status.HTTP_200_OK,
     response_model=ResponseUser,
-    responses=ResetPasswordException.data
+    responses=ResetPasswordException.data,
 )
-def reset(
-    *,
-    req: RequestReset,
-    db_session: Session = Depends(get_db)
-):
+def reset(*, req: RequestReset, db_session: Session = Depends(get_db)):
     return reset_password(
         phone_number=req.phone_number,
         password=req.password,
         db_session=db_session,
     )
+
+
+@router.get(
+    "/", status_code=status.HTTP_200_OK, response_model=ResponseUser, responses=GetUserException.data
+)
+def get(
+    *, user_token: str = Header(..., description="유저 토큰"), db_session: Session = Depends(get_ro_db)
+):
+    return get_user(user_token=user_token, db_session=db_session)

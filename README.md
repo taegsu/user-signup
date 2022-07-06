@@ -239,3 +239,33 @@ $ curl -X 'PATCH' \
   "updated_at": "2022-07-06T12:44:20.542745"
 }
 ```
+
+#### 6. 내 정보 보기 기능
+- 로그인 시에만 이용할 수 있도록 설정
+- user_token을 헤더로 이용함
+```
+# URL
+$ http://localhost:8000/user/v1/
+
+## Example ##
+# Curl
+$ curl -X 'GET' \
+  'http://localhost:8000/user/v1' \
+  -H 'accept: application/json' \
+  -H 'user-token: 4db5dbc8-82ec-4f8e-9848-9fa6d5b1847e'
+  
+# Response Body
+{
+  "id": 4,
+  "user_token": "4db5dbc8-82ec-4f8e-9848-9fa6d5b1847e",
+  "email": "abc@gamil.com",
+  "nickname": "에이블리",
+  "password": "Rlehdeo1!",
+  "name": "택수킴킴",
+  "phone_number": "01021618188",
+  "is_activate": true,
+  "created_at": "2022-07-06T12:52:54.031766",
+  "updated_at": "2022-07-06T12:53:04.713977"
+}
+```
+- --
