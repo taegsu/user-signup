@@ -5,7 +5,7 @@ import re
 from fastapi import HTTPException, status
 
 
-def check_phone_verify(phone_number: int, redis_session) -> bool:
+def check_phone_verify(phone_number: str, redis_session) -> bool:
     verified_data = redis_session.get(phone_number)
     if not verified_data:
         raise HTTPException(
@@ -20,7 +20,7 @@ def check_phone_verify(phone_number: int, redis_session) -> bool:
         verified_data["verified_at"], "%Y-%m-%d %H:%M:%S.%f"
     ) <= datetime.now() - timedelta(minutes=5):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="인증 유효시간이 지났습니다."
+            status_code=status.HTTP_403_FORBIDDEN, detail="인증 유효시간이 지났습니다."
         )
     return True
 
@@ -31,7 +31,7 @@ def phone_verify(phone_number: int, code: int, redis_session) -> dict:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="인증정보가 존재하지 않습니다."
         )
-    verified_data = dict(json.loads(verified_data.decode("utf-8"))) G
+    verified_data = dict(json.loads(verified_data.decode("utf-8")))
     if datetime.strptime(
         verified_data["created_at"], "%Y-%m-%d %H:%M:%S.%f"
     ) <= datetime.now() - timedelta(minutes=5):
@@ -68,6 +68,11 @@ def password_check(password: str) -> bool:
     if not re.findall("[a-z]+", password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="영문 소문자가 포함되어야 합니다."
+        )
+
+    if not re.findall("[A-Z]+", password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="영문 대문자가 포함되어야 합니다."
         )
 
     if not re.findall("['~!@#$%^&*()_+,./<>?]+", password):

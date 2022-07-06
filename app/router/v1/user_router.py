@@ -20,13 +20,13 @@ router = APIRouter(prefix="/user/v1")
     summary="핸드폰 번호 인증",
     responses={
         400: {"content": {"application/json": {"example": {"description": "지원하지 않는 타입 입니다."}}}},
+        403: {"content": {"application/json": {"example": {"description": "인증번호 유효시간이 지났습니다."}}}},
         404: {
             "content": {
                 "application/json": {
                     "examples": {
                         "존재하지 않는 유저입니다.": {"value": {"description": "존재하지 않는 유저입니다."}},
                         "인증정보가 존재하지 않습니다.": {"value": {"description": "인증정보가 존재하지 않습니다."}},
-                        "인증번호 유효시간이 지났습니다.": {"value": {"description": "인증번호 유효시간이 지났습니다."}},
                         "인증번호가 올바르지 않습니다.": {"value": {"description": "인증번호가 올바르지 않습니다."}},
                     }
                 }
@@ -67,7 +67,10 @@ def validate(
                             "value": {"description": "숫자가 포함되어야 합니다."},
                         },
                         "영문 소문자가 포함되어야 합니다.": {
-                            "value": {"description": "숫자가 포함되어야 합니다."},
+                            "value": {"description": "영문 소문자가 포함되어야 합니다."},
+                        },
+                        "영문 대문자가 포함되어야 합니다.": {
+                            "value": {"description": "영문 대문자가 포함되어야 합니다."},
                         },
                         "특수문자가 포함되어야 합니다.": {
                             "value": {"description": "특수문자가 포함되어야 합니다."},

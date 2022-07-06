@@ -1,9 +1,11 @@
 import pytest
 from starlette.testclient import TestClient
+from sqlalchemy import delete
 
 from app.common.database.postgres.core import Base, engine, SessionLocal
 from app.common.database.redis.core import signup_session as signup_redis_session
 from app.common.database.redis.core import reset_session as reset_redis_session
+from app.common.models.user import User
 from app.main import app
 
 
@@ -24,8 +26,9 @@ def init_db():
     Base.metadata.create_all(bind=engine)
 
 
-def init_redis():
-    # Delete All Keys in Redis
+@pytest.fixture(scope="function", autouse=True)
+def reset_db():
+    db_session = SessionLocal()
     keys = signup_redis_session.keys('*')
     if keys:
         signup_redis_session.delete(*keys)
@@ -34,4 +37,9 @@ def init_redis():
         reset_redis_session.delete(*keys)
     signup_redis_session.quit()
     reset_redis_session.quit()
+    query = delete(User)
+    db_session.execute(query)
+    db_session.commit()
+    db_session.close()
     return
+
