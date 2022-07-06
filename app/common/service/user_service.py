@@ -34,7 +34,7 @@ def phone_verify(phone_number: str, code: int, redis_session) -> dict:
     verified_data = dict(json.loads(verified_data.decode("utf-8")))
     if datetime.strptime(
         verified_data["created_at"], "%Y-%m-%d %H:%M:%S.%f"
-    ) <= datetime.now() - timedelta(minutes=5):
+    ) <= datetime.now() - timedelta(minutes=2):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="인증번호 유효시간이 지났습니다."
         )
