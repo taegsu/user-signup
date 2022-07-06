@@ -17,14 +17,14 @@ from app.common.database.redis.core import signup_session as signup_redis_sessio
 from app.schemas.user import LoginType
 
 
-def validate_phone_signup(*, db_session: Session, phone_number: int, code: int) -> dict:
+def validate_phone_signup(*, db_session: Session, phone_number: str, code: int) -> dict:
     user = get_user_by_phone_number(db_session=db_session, phone_number=phone_number)
     if user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="이미 가입한 유저입니다.")
     return phone_verify(phone_number=phone_number, code=code, redis_session=signup_redis_session)
 
 
-def validate_phone_reset_password(*, db_session: Session, phone_number: int, code: int) -> dict:
+def validate_phone_reset_password(*, db_session: Session, phone_number: str, code: int) -> dict:
     user = get_user_by_phone_number(db_session, phone_number)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="존재하지 않는 유저입니다.")
@@ -82,7 +82,7 @@ def logout_user(*, user_token: str, db_session: Session):
     return user
 
 
-def check_user_exist(*, db_session: Session, phone_number: int, email: str, nickname: str):
+def check_user_exist(*, db_session: Session, phone_number: str, email: str, nickname: str):
     user = get_user_by_phone_number(db_session=db_session, phone_number=phone_number)
     if user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="해당 번호는 이미 가입한 유저입니다.")

@@ -31,8 +31,7 @@ def phone_verify(phone_number: int, code: int, redis_session) -> dict:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="인증정보가 존재하지 않습니다."
         )
-    verified_data = dict(json.loads(verified_data.decode("utf-8")))
-    print(datetime.now())
+    verified_data = dict(json.loads(verified_data.decode("utf-8"))) G
     if datetime.strptime(
         verified_data["created_at"], "%Y-%m-%d %H:%M:%S.%f"
     ) <= datetime.now() - timedelta(minutes=5):

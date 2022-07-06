@@ -9,4 +9,4 @@ class MessageType(str, Enum):
 
 
 class PhoneNumber(BaseModel):
-    phone_number: int
+    phone_number: str

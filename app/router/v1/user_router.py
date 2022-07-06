@@ -36,7 +36,7 @@ router = APIRouter(prefix="/user/v1")
     },
 )
 def validate(
-    *, db_session: Session = Depends(get_ro_db), type: MessageType, phone_number: int, code: int
+    *, db_session: Session = Depends(get_ro_db), type: MessageType, phone_number: str, code: int
 ):
     if type == MessageType.signup:
         return validate_phone_signup(db_session=db_session, phone_number=phone_number, code=code)

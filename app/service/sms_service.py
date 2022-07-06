@@ -11,7 +11,7 @@ from app.repository.user_repo import get_user_by_phone_number
 from app.schemas.sms import MessageType
 
 
-def send(*, db_session: Session, type: str, phone_number: int):
+def send(*, db_session: Session, type: str, phone_number: str):
     code = randint(1000, 9999)
     value_dict = {"created_at": datetime.now(), "code": code}
     value = json.dumps(value_dict, default=str)

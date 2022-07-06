@@ -1,14 +1,21 @@
 import pytest
+from starlette.testclient import TestClient
 
 from app.common.database.postgres.core import Base, engine, SessionLocal
 from app.common.database.redis.core import signup_session as signup_redis_session
 from app.common.database.redis.core import reset_session as reset_redis_session
+from app.main import app
 
 
 @pytest.fixture(scope="session")
 def session():
     db_session = SessionLocal()
     yield db_session
+
+
+@pytest.fixture(scope="session")
+def test_client():
+    return TestClient(app)
 
 
 @pytest.fixture(scope="class", autouse=True)
